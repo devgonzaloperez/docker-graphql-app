@@ -31,7 +31,6 @@ jobs:
       env:
         DOCKER_USER: ${{secrets.DOCKER_USER}}
         DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
-        NEW_VERSION: ${{steps.version.outputs.version}}
       run: |
         echo "Iniciando login"
         docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
@@ -39,13 +38,17 @@ jobs:
         echo "[NEW VERSION] $NEW_VERSION"
     
     - name: Build Docker image
+      env:
+        NEW_VERSION: ${{steps.version.outputs.version}}
       run: |
-        docker build -t devgonzaloperez/graphql-app:0.0.2 .
+        docker build -t devgonzaloperez/graphql-app:$NEW_VERSION .
         docker build -t devgonzaloperez/graphql-app:latest .
     
     - name: Push Docker Image
+      env:
+        NEW_VERSION: ${{steps.version.outputs.version}}
       run: |
-        docker push devgonzaloperez/graphql-app:0.0.2
+        docker push devgonzaloperez/graphql-app:$NEW_VERSION
         docker push devgonzaloperez/graphql-app:latest
       
       
