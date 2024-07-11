@@ -28,9 +28,11 @@ jobs:
     - name: Build Docker image
       run: |
         docker build -t devgonzaloperez/graphql-app:0.0.2 .
+        docker build -t devgonzaloperez/graphql-app:latest .
     - name: Push Docker Image
       run: |
         docker push devgonzaloperez/graphql-app:0.0.2
+        docker push devgonzaloperez/graphql-app:latest
       
       
      
