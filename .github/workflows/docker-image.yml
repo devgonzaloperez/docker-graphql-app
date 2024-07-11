@@ -1,24 +1,28 @@
+# NOMBRE DEL FLUJO DE TRABAJO (WORKFLOW).
 name: Docker Image CI
 
+# EVENTOS QUE DESENCADENAN EL FLUJO DE TRABAJO (WORKFLOW).
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
+# DEFINICIÓN DE LOS TRABAJOS (JOBS).
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
+    # PASOS DEL TRABAJO (STEPS). Cada paso dentro del trabajo define una acción específica que se llevará a cabo.
     steps:
-    
+
+    # [PASO 1: CHECKOUT DEL CÓDIGO]. Este paso usa la acción actions/checkout@v4 para clonar el repositorio en el entorno de ejecución. El parámetro fetch-depth: 0 asegura que se clona todo el historial del git.
     - name: Checkout code
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    
+
+    # [PASO 2: VERSIÓN SEMÁNTICA]. Este paso utiliza una librería para determinar la versión semántica del código basándose en los mensajes del commit. Se aumenta +1 en major cuando el commit contiene el text "major:" y se aumenta +1 en minor cuando contiene el texto "feat:". La salida de este paso se almacena con el ID version.
     - name: Git Semantic Version
       uses: PaulHatch/semantic-version@v4.0.3
       with: 
@@ -26,7 +30,8 @@ jobs:
         minor_pattern: "feat:"
         format: "${major}.${minor}.${patch}-prerelease${increment}"
       id: version
-        
+
+    # [PASO 3: LOGIN EN DOCKER HUB]. Este paso inicia sesión en Docker Hub usando las credenciales almacenadas en los secretos del repositorio (DOCKER_USER y DOCKER_PASSWORD). También imprime mensajes de registro para seguimiento.
     - name: Docker login
       env:
         DOCKER_USER: ${{secrets.DOCKER_USER}}
@@ -36,14 +41,16 @@ jobs:
         docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
         echo "Fin del login"
         echo "[NEW VERSION] $NEW_VERSION"
-    
+
+    # [PASO 4: CONSTRUCCIÓN DE LA IMAGEN DE DOCKER]. Este paso construye la imagen Docker. Usa la versión calculada en el paso de versión semántica (NEW_VERSION) para etiquetar la imagen y también crea una etiqueta latest.
     - name: Build Docker image
       env:
         NEW_VERSION: ${{steps.version.outputs.version}}
       run: |
         docker build -t devgonzaloperez/graphql-app:$NEW_VERSION .
         docker build -t devgonzaloperez/graphql-app:latest .
-    
+
+    # [PASO 5: PUSH DE LA IMAGEN DE DOCKER]. Este paso sube la imagen Docker construida al registro de Docker Hub usando las etiquetas NEW_VERSION y latest.
     - name: Push Docker Image
       env:
         NEW_VERSION: ${{steps.version.outputs.version}}
