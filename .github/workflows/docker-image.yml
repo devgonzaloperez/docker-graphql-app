@@ -57,13 +57,3 @@ jobs:
       run: |
         docker push devgonzaloperez/graphql-app:$NEW_VERSION
         docker push devgonzaloperez/graphql-app:latest
-      
-      
-     
-  
-        
-    
-    
-    
-    #- name: Build the Docker image
-      #run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
